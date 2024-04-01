@@ -1055,11 +1055,19 @@ class _ExtendedImageState extends State<ExtendedImage>
           context.findAncestorStateOfType<ExtendedImageSlidePageState>();
     }
 
-    if (TickerMode.of(context)) {
-      _listenToStream();
-    } else {
-      _stopListeningToStream(keepStreamAlive: true);
-    }
+    // Note:
+    // Due to ExtendedImage listened to TikerMode in [didChangeDependency],
+    // Thus it will be called didUpdateDependency when TikerMode is changed.
+    // Everytime when push and pop a page by using Hero, it will change the TikerMode and hence
+    // trigger the rebuild of the ExtenedImage and it will cause the blank issue.
+    // A better way might be early return for unnecessary changes.
+    _listenToStream();
+    // The code below is originated from [TikerMode] inside [Hero] widget.
+    // if (TickerMode.of(context)) {
+    // _listenToStream();
+    // } else {
+    //   _stopListeningToStream(keepStreamAlive: true);
+    // }
 
     super.didChangeDependencies();
   }
@@ -1298,7 +1306,7 @@ class _ExtendedImageState extends State<ExtendedImage>
   }
 
   void _updateInvertColors() {
-    _invertColors = MediaQuery.maybeOf(context)?.invertColors ??
+    _invertColors = MediaQuery.maybeInvertColorsOf(context) ??
         SemanticsBinding.instance.accessibilityFeatures.invertColors;
   }
 
